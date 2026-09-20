@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile & Settings — CampusCare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-mount"></div>
+
+  <main class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <div class="card card-custom border-0 shadow-sm p-4 mb-4">
+          <div class="d-flex flex-column flex-sm-row align-items-center gap-4">
+            <div class="position-relative">
+              <img id="profile-avatar-preview" src="/images/default-avatar.svg" alt="Avatar" class="rounded-circle border shadow" width="110" height="110" style="object-fit: cover;">
+            </div>
+            <div class="text-center text-sm-start flex-grow-1">
+              <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 mb-1">
+                <h3 class="fw-bold mb-0" id="profile-name">Student Name</h3>
+                <span class="badge bg-primary font-monospace" id="profile-role-badge">STUDENT</span>
+              </div>
+              <div class="text-muted small" id="profile-dept-sub">Computer Science • Thakur Ramnarayan College</div>
+              <div class="text-muted small">Institutional Roll No: <strong id="profile-roll">2407106</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Edit Personal Details -->
+          <div class="col-md-7">
+            <div class="card card-custom h-100 p-4 shadow-sm">
+              <h5 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-primary me-2"></i> Edit Profile Details</h5>
+              <form id="profile-form">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Full Name</label>
+                  <input type="text" id="prof-name" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Institutional Email (Read-Only)</label>
+                  <input type="email" id="prof-email" class="form-control bg-light" readonly>
+                </div>
+
+                <div class="row g-3 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold">Phone Number</label>
+                    <input type="tel" id="prof-phone" class="form-control" placeholder="+91 91375 88990">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold">Academic Year</label>
+                    <input type="text" id="prof-year" class="form-control" placeholder="T.Y.B.Sc. (CS)">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Department</label>
+                  <select id="prof-dept" class="form-select">
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Management Studies">Management Studies</option>
+                    <option value="Commerce & Accounting">Commerce & Accounting</option>
+                    <option value="Administration">Administration</option>
+                  </select>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label small fw-semibold">Upload New Profile Picture</label>
+                  <input type="file" id="prof-avatar-file" class="form-control" accept="image/*">
+                </div>
+
+                <button type="submit" id="save-profile-btn" class="btn btn-primary fw-semibold px-4">
+                  Save Changes
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Change Password -->
+          <div class="col-md-5">
+            <div class="card card-custom h-100 p-4 shadow-sm">
+              <h5 class="fw-bold mb-3"><i class="bi bi-shield-lock text-warning me-2"></i> Change Password</h5>
+              <form id="password-form">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Current Password</label>
+                  <input type="password" id="curr-password" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">New Password</label>
+                  <input type="password" id="new-password" class="form-control" placeholder="Minimum 6 characters" minlength="6" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Confirm New Password</label>
+                  <input type="password" id="confirm-password" class="form-control" placeholder="••••••••" minlength="6" required>
+                </div>
+
+                <button type="submit" id="pw-submit-btn" class="btn btn-outline-warning text-dark fw-bold w-100 mt-2">
+                  Update Password
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    renderNavbar('profile');
+
+    requireAuth().then(user => {
+      if (!user) return;
+
+      document.getElementById('profile-name').innerText = user.fullName;
+      document.getElementById('profile-role-badge').innerText = user.roleName.toUpperCase();
+      document.getElementById('profile-dept-sub').innerText = `${user.department} • Thakur Ramnarayan College`;
+      document.getElementById('profile-roll').innerText = user.rollNumber || 'N/A';
+      if (user.avatarUrl) {
+        document.getElementById('profile-avatar-preview').src = user.avatarUrl;
+      }
+
+      document.getElementById('prof-name').value = user.fullName;
+      document.getElementById('prof-email').value = user.email;
+      document.getElementById('prof-phone').value = user.phone || '';
+      document.getElementById('prof-year').value = user.yearOfStudy || 'T.Y.B.Sc. (CS)';
+      document.getElementById('prof-dept').value = user.department || 'Computer Science';
+    });
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('save-profile-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Saving...';
+
+      try {
+        const formData = new FormData();
+        formData.append('full_name', document.getElementById('prof-name').value);
+        formData.append('phone', document.getElementById('prof-phone').value);
+        formData.append('year_of_study', document.getElementById('prof-year').value);
+        formData.append('department', document.getElementById('prof-dept').value);
+
+        const avatarFile = document.getElementById('prof-avatar-file').files[0];
+        if (avatarFile) {
+          formData.append('avatar', avatarFile);
+        }
+
+        const res = await fetchAPI('/auth/profile', {
+          method: 'PUT',
+          body: formData
+        });
+
+        showToast(res.message);
+        if (res.avatarUrl) {
+          document.getElementById('profile-avatar-preview').src = res.avatarUrl;
+        }
+        document.getElementById('profile-name').innerText = document.getElementById('prof-name').value;
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Save Changes';
+      }
+    });
+
+    document.getElementById('password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const curr = document.getElementById('curr-password').value;
+      const newPw = document.getElementById('new-password').value;
+      const confirmPw = document.getElementById('confirm-password').value;
+
+      if (newPw !== confirmPw) {
+        showToast('New passwords do not match!', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('pw-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Updating...';
+
+      try {
+        const res = await fetchAPI('/auth/change-password', {
+          method: 'PUT',
+          body: { current_password: curr, new_password: newPw }
+        });
+
+        showToast(res.message);
+        document.getElementById('password-form').reset();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Update Password';
+      }
+    });
+  </script>
+</body>
+</html>

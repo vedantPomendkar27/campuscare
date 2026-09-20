@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusCare — One Campus. One Platform. Better Care.</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <div id="navbar-mount"></div>
+
+  <!-- Hero Section -->
+  <section class="hero-banner">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7">
+          <span class="badge bg-light text-primary px-3 py-2 rounded-pill fw-semibold mb-3 shadow-sm">
+            <i class="bi bi-mortarboard-fill me-1"></i> Thakur Ramnarayan College of Arts & Commerce
+          </span>
+          <h1 class="display-4 fw-black tracking-tight mb-3">
+            Campus<span class="text-info">Care</span>
+          </h1>
+          <p class="fs-4 fw-light text-light mb-4">
+            A Centralized Campus Utility & Support Web Application
+          </p>
+          <p class="lead text-light opacity-90 mb-4" style="max-width: 600px;">
+            Connecting students, faculty, and administration under one unified digital platform. Exchange peer resources, recover lost belongings, track facility grievances, and access verified QR event passes effortlessly.
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="/login.html" class="btn btn-primary btn-lg px-4 shadow-sm fw-bold">
+              <i class="bi bi-box-arrow-in-right me-2"></i> Launch Portal
+            </a>
+            <a href="/register.html" class="btn btn-outline-light btn-lg px-4 fw-bold">
+              <i class="bi bi-person-plus me-2"></i> Student Registration
+            </a>
+            <button class="btn btn-sos btn-lg px-4 fw-bold" onclick="triggerSOSModal()">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i> Campus SOS
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-5 text-center">
+          <div class="card bg-white text-dark p-4 rounded-4 shadow-lg border-0">
+            <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Demo Access</h5>
+            <p class="text-muted small mb-3">Instant role testing for evaluation:</p>
+            <div class="d-grid gap-2">
+              <button class="btn btn-outline-primary text-start d-flex justify-content-between align-items-center p-2" onclick="quickLogin('vedant@campuscare.edu', 'student123')">
+                <div>
+                  <strong>Vedant Pomendkar</strong>
+                  <div class="small text-muted">Student (T.Y.B.Sc. CS)</div>
+                </div>
+                <span class="badge bg-primary">Login &rarr;</span>
+              </button>
+              <button class="btn btn-outline-warning text-dark text-start d-flex justify-content-between align-items-center p-2" onclick="quickLogin('deptadmin@campuscare.edu', 'admin123')">
+                <div>
+                  <strong>Dr. Sandeep Kamble</strong>
+                  <div class="small text-muted">Department Admin / HOD</div>
+                </div>
+                <span class="badge bg-warning text-dark">Login &rarr;</span>
+              </button>
+              <button class="btn btn-outline-danger text-start d-flex justify-content-between align-items-center p-2" onclick="quickLogin('admin@campuscare.edu', 'admin123')">
+                <div>
+                  <strong>Super Administrator</strong>
+                  <div class="small text-muted">System Governance & RBAC</div>
+                </div>
+                <span class="badge bg-danger">Login &rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Stats -->
+  <section class="py-4 bg-white border-bottom">
+    <div class="container">
+      <div class="row g-3" id="live-stats">
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number" id="stat-students">500+</div>
+            <div class="stat-label">Campus Students</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number" id="stat-complaints">98%</div>
+            <div class="stat-label">Grievance Resolution</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number" id="stat-items">₹0 / Free</div>
+            <div class="stat-label">Peer Exchanges</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number" id="stat-events">100%</div>
+            <div class="stat-label">QR Gate Verified</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Modules -->
+  <section class="py-5" id="features">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="badge bg-primary-light text-primary px-3 py-1 rounded-pill fw-semibold">Centralized Architecture</span>
+        <h2 class="fw-bold mt-2">Comprehensive Campus Modules</h2>
+        <p class="text-muted" style="max-width: 650px; margin: 0 auto;">
+          Designed in compliance with IEEE 830-1998 Software Requirements Specification for institutional student services.
+        </p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Module 1 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 card-custom border-0 shadow-sm p-3">
+            <div class="action-icon bg-primary text-white rounded-3 mb-3">
+              <i class="bi bi-shop"></i>
+            </div>
+            <h5 class="fw-bold">P2P Marketplace</h5>
+            <p class="text-muted small">
+              Exchange textbooks, lab coats, drafters, and calculators. Choose between Sale, Borrow, or Giveaway with secure request approvals.
+            </p>
+            <a href="/marketplace.html" class="btn btn-outline-primary btn-sm mt-auto fw-semibold">Browse Listings &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Module 2 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 card-custom border-0 shadow-sm p-3">
+            <div class="action-icon bg-success text-white rounded-3 mb-3">
+              <i class="bi bi-search"></i>
+            </div>
+            <h5 class="fw-bold">Lost & Found</h5>
+            <p class="text-muted small">
+              Report lost and discovered belongings. Features automated keyword similarity matching and administrative claim verification with return receipts.
+            </p>
+            <a href="/lost-found.html" class="btn btn-outline-success btn-sm mt-auto fw-semibold">Report or Search &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Module 3 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 card-custom border-0 shadow-sm p-3">
+            <div class="action-icon bg-warning text-dark rounded-3 mb-3">
+              <i class="bi bi-ticket-detailed"></i>
+            </div>
+            <h5 class="fw-bold">Grievance Redressal</h5>
+            <p class="text-muted small">
+              Submit IT, hygiene, or infrastructure tickets with photo proof. Track live status codes (<code>CMP-2026-XXXX</code>) and provide service ratings.
+            </p>
+            <a href="/complaints.html" class="btn btn-outline-warning text-dark btn-sm mt-auto fw-semibold">File Complaint &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Module 4 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 card-custom border-0 shadow-sm p-3">
+            <div class="action-icon bg-info text-white rounded-3 mb-3">
+              <i class="bi bi-qr-code-scan"></i>
+            </div>
+            <h5 class="fw-bold">Events & QR Passes</h5>
+            <p class="text-muted small">
+              Real-time seat reservations, anti-proxy dynamic QR entry passes, live webcam gate scanning, and automated participation certificates.
+            </p>
+            <a href="/events.html" class="btn btn-outline-info btn-sm mt-auto fw-semibold">View Events &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Info Section -->
+  <section class="py-5 bg-white border-top" id="about">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+          <span class="badge bg-secondary-subtle text-secondary px-3 py-1 rounded-pill fw-semibold">Academic Project Reference</span>
+          <h3 class="fw-bold mt-2">Thakur Ramnarayan College of Arts & Commerce</h3>
+          <p class="text-muted">
+            CampusCare is developed as a final year BSc (Computer Science) mini-project by <strong>Mr. Vedant Milind Pomendkar (Roll No. 2407106)</strong> under the mentorship of <strong>Dr. Sandeep Kamble</strong> (Head of Department, Computer Science).
+          </p>
+          <ul class="list-unstyled d-flex flex-column gap-2 text-secondary">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Full 3-Tier Architecture</strong>: Bootstrap 5, Express.js REST API, and Relational 3NF SQL.</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Role-Based Access Control (RBAC)</strong>: Multi-level privileges for Students and Administrators.</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Resilient Runtime</strong>: Native MySQL support with automatic zero-configuration SQLite fallback.</li>
+          </ul>
+        </div>
+        <div class="col-lg-6">
+          <div class="p-4 bg-light rounded-4 border">
+            <h5 class="fw-bold mb-3"><i class="bi bi-shield-check text-primary me-2"></i> System Security Baseline</h5>
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="badge bg-primary fs-6 p-2 rounded-circle"><i class="bi bi-key-fill"></i></div>
+              <div>
+                <strong>Bcrypt Password Hashing</strong>
+                <div class="small text-muted">Salt work factor 10 with strict non-plaintext storage.</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="badge bg-info text-white fs-6 p-2 rounded-circle"><i class="bi bi-qr-code"></i></div>
+              <div>
+                <strong>Cryptographic QR Pass Tokenization</strong>
+                <div class="small text-muted">SHA-256 hashed signature prevents pass forgery or reuse.</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="badge bg-danger fs-6 p-2 rounded-circle"><i class="bi bi-broadcast"></i></div>
+              <div>
+                <strong>Instant Sub-Second Emergency SOS</strong>
+                <div class="small text-muted">Captures live coordinates and bypasses queues to notify security.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container text-center">
+      <div class="mb-2">
+        <img src="/images/logo.svg" alt="CampusCare" height="32">
+      </div>
+      <p class="small text-muted mb-1">
+        <strong>CampusCare — One Campus. One Platform. Better Care.</strong>
+      </p>
+      <p class="small text-muted mb-0">
+        © 2026-2027 Thakur Ramnarayan College of Arts & Commerce • Department of Computer Science
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    renderNavbar('home');
+
+    async function quickLogin(email, password) {
+      try {
+        const res = await fetchAPI('/auth/login', {
+          method: 'POST',
+          body: { email, password }
+        });
+        showToast(res.message);
+        setTimeout(() => {
+          window.location.href = res.redirectUrl;
+        }, 600);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

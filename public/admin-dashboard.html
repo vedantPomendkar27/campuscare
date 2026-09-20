@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Operations Center — CampusCare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-mount"></div>
+
+  <main class="container-fluid py-4 px-md-5">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="fw-bold mb-0"><i class="bi bi-speedometer2 text-primary me-2"></i> Campus Administration Center</h2>
+          <span class="badge bg-danger font-monospace px-2 py-1" id="role-badge">ADMIN</span>
+        </div>
+        <p class="text-muted small mb-0 mt-1">Multi-role governance for complaints resolution, claim approvals, event monitoring, and user RBAC</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/gate-scanner.html" class="btn btn-outline-primary fw-semibold">
+          <i class="bi bi-qr-code-scan me-1"></i> Launch Gate Scanner
+        </a>
+        <button class="btn btn-primary fw-semibold" onclick="refreshAllData()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Refresh Stats
+        </button>
+      </div>
+    </div>
+
+    <!-- Metrics Cards Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 shadow-sm border-start border-primary border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stat-label">Total Users</div>
+              <div class="stat-number text-primary" id="kpi-users">--</div>
+              <div class="small text-muted" id="kpi-students-sub">-- students</div>
+            </div>
+            <div class="action-icon bg-primary-subtle text-primary fs-3">
+              <i class="bi bi-people-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 shadow-sm border-start border-warning border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stat-label">Grievances</div>
+              <div class="stat-number text-warning" id="kpi-complaints">--</div>
+              <div class="small text-muted" id="kpi-complaints-sub">-- pending action</div>
+            </div>
+            <div class="action-icon bg-warning-subtle text-warning fs-3">
+              <i class="bi bi-shield-exclamation"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 shadow-sm border-start border-success border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stat-label">Lost & Found</div>
+              <div class="stat-number text-success" id="kpi-lostfound">--</div>
+              <div class="small text-muted" id="kpi-lostfound-sub">-- returned to owner</div>
+            </div>
+            <div class="action-icon bg-success-subtle text-success fs-3">
+              <i class="bi bi-search"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-3">
+        <div class="card card-custom p-3 shadow-sm border-start border-info border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stat-label">Events & Gate QR</div>
+              <div class="stat-number text-info" id="kpi-events">--</div>
+              <div class="small text-muted" id="kpi-events-sub">-- registrations</div>
+            </div>
+            <div class="action-icon bg-info-subtle text-info fs-3">
+              <i class="bi bi-calendar-check-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4 fw-semibold" id="adminTabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active" id="tab-complaints" data-bs-toggle="tab" data-bs-target="#pane-complaints" onclick="loadAdminComplaints()">
+          <i class="bi bi-shield-exclamation me-1 text-warning"></i> Grievance Desk
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" id="tab-claims" data-bs-toggle="tab" data-bs-target="#pane-claims" onclick="loadAdminClaims()">
+          <i class="bi bi-patch-check me-1 text-success"></i> Lost & Found Claims
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" id="tab-events" data-bs-toggle="tab" data-bs-target="#pane-events" onclick="loadAdminEvents()">
+          <i class="bi bi-calendar-event me-1 text-info"></i> Events Management
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link text-danger" id="tab-sos" data-bs-toggle="tab" data-bs-target="#pane-sos" onclick="loadAdminSOS()">
+          <i class="bi bi-broadcast me-1"></i> Emergency SOS Monitor
+        </button>
+      </li>
+      <li class="nav-item" id="superadmin-user-tab" style="display: none;">
+        <button class="nav-link text-dark" id="tab-users" data-bs-toggle="tab" data-bs-target="#pane-users" onclick="loadAdminUsers()">
+          <i class="bi bi-person-gear me-1 text-primary"></i> User RBAC Management
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- 1. Grievance Resolution Desk -->
+      <div class="tab-pane fade show active" id="pane-complaints">
+        <div class="card card-custom shadow-sm mb-4">
+          <div class="p-3 border-bottom bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center">
+            <div class="d-flex flex-wrap gap-2">
+              <select id="adm-comp-status" class="form-select form-select-sm" style="width: 170px;" onchange="loadAdminComplaints()">
+                <option value="All">All Statuses</option>
+                <option value="SUBMITTED">SUBMITTED</option>
+                <option value="UNDER REVIEW">UNDER REVIEW</option>
+                <option value="IN PROGRESS">IN PROGRESS</option>
+                <option value="RESOLVED">RESOLVED</option>
+                <option value="CLOSED">CLOSED</option>
+              </select>
+              <select id="adm-comp-cat" class="form-select form-select-sm" style="width: 180px;" onchange="loadAdminComplaints()">
+                <option value="All">All Categories</option>
+                <option value="IT & Labs">IT & Labs</option>
+                <option value="Infrastructure & Maintenance">Infrastructure</option>
+                <option value="Sanitation & Hygiene">Sanitation</option>
+                <option value="Library">Library</option>
+                <option value="Academic & Canteen">Academic & Canteen</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm" style="width: 250px;">
+              <input type="text" id="adm-comp-search" class="form-control" placeholder="Search ticket / student..." onkeyup="adminCompDebounce()">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light small text-uppercase">
+                <tr>
+                  <th>Ticket</th>
+                  <th>Student</th>
+                  <th>Category / Location</th>
+                  <th>Urgency</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody id="adm-complaints-tbody">
+                <tr><td colspan="7" class="text-center py-4 text-muted">Loading grievances...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Lost & Found Claims Desk -->
+      <div class="tab-pane fade" id="pane-claims">
+        <div class="card card-custom shadow-sm mb-4">
+          <div class="card-header-custom">
+            <div class="fw-bold"><i class="bi bi-shield-check text-success me-2"></i> Student Ownership Claims Verification</div>
+            <span class="small text-muted">Review claimant proof against recovered found items</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light small text-uppercase">
+                <tr>
+                  <th>Item Discovered</th>
+                  <th>Claimant Student</th>
+                  <th>Ownership Proof Submitted</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th class="text-end">Verification Action</th>
+                </tr>
+              </thead>
+              <tbody id="adm-claims-tbody">
+                <tr><td colspan="6" class="text-center py-4 text-muted">Loading claims...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Events Management -->
+      <div class="tab-pane fade" id="pane-events">
+        <div class="card card-custom shadow-sm mb-4">
+          <div class="card-header-custom">
+            <div class="fw-bold"><i class="bi bi-calendar-week text-primary me-2"></i> Published Campus Events</div>
+            <a href="/events.html" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> New Event</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light small text-uppercase">
+                <tr>
+                  <th>Event Name</th>
+                  <th>Department</th>
+                  <th>Date & Venue</th>
+                  <th>Attendance Capacity</th>
+                  <th>Status</th>
+                  <th class="text-end">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="adm-events-tbody">
+                <tr><td colspan="6" class="text-center py-4 text-muted">Loading events...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Emergency SOS Monitor -->
+      <div class="tab-pane fade" id="pane-sos">
+        <div class="card card-custom shadow-sm mb-4 border-danger border-2">
+          <div class="card-header-custom bg-danger text-white">
+            <div class="fw-bold"><i class="bi bi-broadcast me-2"></i> High-Priority Emergency SOS Broadcasts</div>
+            <span class="small opacity-90">Sub-second emergency incident response queue</span>
+          </div>
+          <div class="p-3" id="adm-sos-container">
+            <div class="text-center py-4 text-muted">Loading emergency log...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Super Admin User Management -->
+      <div class="tab-pane fade" id="pane-users">
+        <div class="card card-custom shadow-sm mb-4">
+          <div class="card-header-custom bg-light">
+            <div class="fw-bold"><i class="bi bi-person-gear text-primary me-2"></i> User Directory & Access Control (RBAC)</div>
+            <span class="badge bg-danger">SUPER ADMIN ONLY</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light small text-uppercase">
+                <tr>
+                  <th>User Details</th>
+                  <th>Roll / ID</th>
+                  <th>Department & Year</th>
+                  <th>Current Role</th>
+                  <th>Account Status</th>
+                  <th class="text-end">Modify Role / Status</th>
+                </tr>
+              </thead>
+              <tbody id="adm-users-tbody">
+                <tr><td colspan="6" class="text-center py-4 text-muted">Loading users directory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Update Complaint Status -->
+  <div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i> Update Grievance Status</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="update-status-form">
+          <input type="hidden" id="up-complaint-id">
+          <div class="modal-body p-4">
+            <div class="p-3 bg-light rounded-3 mb-3">
+              <div class="fw-bold" id="up-ticket-code"></div>
+              <div class="small text-muted" id="up-ticket-title"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Transition Status To *</label>
+              <select id="up-status-select" class="form-select" required>
+                <option value="UNDER REVIEW">UNDER REVIEW</option>
+                <option value="IN PROGRESS">IN PROGRESS (Technician Assigned)</option>
+                <option value="RESOLVED">RESOLVED (Work Completed)</option>
+                <option value="CLOSED">CLOSED</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Official Resolution Notes / Action Taken</label>
+              <textarea id="up-notes" class="form-control" rows="3" placeholder="Explain what action was taken or dispatch details. This note is shared directly with the student." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" id="up-submit-btn" class="btn btn-primary fw-semibold">Update & Notify Student</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    renderNavbar('dashboard');
+
+    let currentUser = null;
+    let compDebounceTimer;
+
+    requireAuth(['dept_admin', 'super_admin']).then(user => {
+      if (!user) return;
+      currentUser = user;
+
+      document.getElementById('role-badge').innerText = user.roleName === 'super_admin' ? 'SUPER ADMIN' : 'DEPARTMENT ADMIN';
+
+      // Show Super Admin User Management Tab if Super Admin
+      if (user.roleName === 'super_admin') {
+        const userTab = document.getElementById('superadmin-user-tab');
+        if (userTab) userTab.style.display = 'block';
+      }
+
+      refreshAllData();
+    });
+
+    async function refreshAllData() {
+      loadStats();
+      loadAdminComplaints();
+      loadAdminClaims();
+      loadAdminEvents();
+      loadAdminSOS();
+      if (currentUser && currentUser.roleName === 'super_admin') {
+        loadAdminUsers();
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetchAPI('/admin/stats');
+        const s = res.stats;
+        document.getElementById('kpi-users').innerText = s.users.total;
+        document.getElementById('kpi-students-sub').innerText = `${s.users.students} students registered`;
+
+        document.getElementById('kpi-complaints').innerText = s.complaints.total;
+        document.getElementById('kpi-complaints-sub').innerText = `${s.complaints.pending} pending, ${s.complaints.inProgress} in progress`;
+
+        document.getElementById('kpi-lostfound').innerText = s.lostFound.total;
+        document.getElementById('kpi-lostfound-sub').innerText = `${s.lostFound.returned} returned to owners`;
+
+        document.getElementById('kpi-events').innerText = s.events.total;
+        document.getElementById('kpi-events-sub').innerText = `${s.events.registrations} passes issued`;
+      } catch (e) {}
+    }
+
+    function adminCompDebounce() {
+      clearTimeout(compDebounceTimer);
+      compDebounceTimer = setTimeout(loadAdminComplaints, 300);
+    }
+
+    async function loadAdminComplaints() {
+      const tbody = document.getElementById('adm-complaints-tbody');
+      const status = document.getElementById('adm-comp-status').value;
+      const category = document.getElementById('adm-comp-cat').value;
+      const search = document.getElementById('adm-comp-search').value;
+
+      try {
+        const queryParams = new URLSearchParams({ status, category, search });
+        const res = await fetchAPI('/complaints/all?' + queryParams.toString());
+
+        if (!res.complaints || res.complaints.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No complaints found matching filter.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = res.complaints.map(c => `
+          <tr>
+            <td><span class="badge bg-dark font-monospace">${c.ticket_code}</span></td>
+            <td>
+              <div class="fw-bold text-dark">${c.student_name}</div>
+              <div class="small text-muted">${c.roll_number || ''} • ${c.student_phone || ''}</div>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">${c.category}</div>
+              <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>${c.location}</div>
+            </td>
+            <td>${getUrgencyBadge(c.urgency)}</td>
+            <td>${getComplaintStatusBadge(c.status)}</td>
+            <td class="small text-muted">${new Date(c.created_at).toLocaleDateString()}</td>
+            <td class="text-end">
+              <button class="btn btn-outline-primary btn-sm py-1 fw-semibold" onclick="openUpdateStatusModal(${c.complaint_id}, '${c.ticket_code}', '${escapeHtml(c.title)}', '${c.status}')">
+                <i class="bi bi-pencil-square me-1"></i> Update
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Failed to load complaints table.</td></tr>';
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function openUpdateStatusModal(id, ticketCode, title, currentStatus) {
+      document.getElementById('up-complaint-id').value = id;
+      document.getElementById('up-ticket-code').innerText = ticketCode;
+      document.getElementById('up-ticket-title').innerText = title;
+      document.getElementById('up-status-select').value = currentStatus;
+      document.getElementById('up-notes').value = '';
+      const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+      modal.show();
+    }
+
+    document.getElementById('update-status-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const complaintId = document.getElementById('up-complaint-id').value;
+      const status = document.getElementById('up-status-select').value;
+      const resolution_notes = document.getElementById('up-notes').value;
+      const btn = document.getElementById('up-submit-btn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Updating...';
+
+      try {
+        const res = await fetchAPI(`/complaints/${complaintId}/status`, {
+          method: 'PUT',
+          body: { status, resolution_notes }
+        });
+
+        bootstrap.Modal.getInstance(document.getElementById('updateStatusModal')).hide();
+        showToast(res.message);
+        loadAdminComplaints();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Update & Notify Student';
+      }
+    });
+
+    async function loadAdminClaims() {
+      const tbody = document.getElementById('adm-claims-tbody');
+      try {
+        const res = await fetchAPI('/lost-found/claims');
+        if (!res.claims || res.claims.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No ownership claims pending.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = res.claims.map(c => `
+          <tr>
+            <td>
+              <div class="fw-bold text-dark">${c.item_name}</div>
+              <div class="small text-muted">${c.category} • Custody: ${c.custody_details || 'Main Desk'}</div>
+            </td>
+            <td>
+              <div class="fw-bold">${c.claimant_name}</div>
+              <div class="small text-muted">Roll: ${c.claimant_roll || 'N/A'} • <i class="bi bi-telephone me-1"></i>${c.claimant_phone || 'N/A'}</div>
+            </td>
+            <td>
+              <div class="p-2 rounded bg-light border small text-dark" style="max-width: 320px;">
+                "${c.proof_description}"
+              </div>
+              ${c.proof_image_url ? `<a href="${c.proof_image_url}" target="_blank" class="small text-primary mt-1 d-inline-block">View Proof Image</a>` : ''}
+            </td>
+            <td>
+              <span class="badge ${c.status === 'APPROVED' ? 'bg-success' : c.status === 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark'}">${c.status}</span>
+            </td>
+            <td class="small text-muted">${new Date(c.created_at).toLocaleDateString()}</td>
+            <td class="text-end">
+              ${c.status === 'PENDING' ? `
+                <button class="btn btn-success btn-sm me-1" onclick="verifyClaim(${c.claim_id}, 'APPROVE')">
+                  <i class="bi bi-check-lg"></i> Approve & Return
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="verifyClaim(${c.claim_id}, 'REJECT')">
+                  Reject
+                </button>
+              ` : `
+                <span class="small text-muted">${c.admin_remarks || 'Processed'}</span>
+              `}
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Failed to load claims.</td></tr>';
+      }
+    }
+
+    async function verifyClaim(claimId, action) {
+      const remarks = prompt(action === 'APPROVE' ? 'Add handover remarks / return note:' : 'Reason for rejection:');
+      if (remarks === null) return;
+
+      try {
+        const res = await fetchAPI(`/lost-found/claims/${claimId}/verify`, {
+          method: 'POST',
+          body: { action, admin_remarks: remarks }
+        });
+        showToast(res.message);
+        loadAdminClaims();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function loadAdminEvents() {
+      const tbody = document.getElementById('adm-events-tbody');
+      try {
+        const res = await fetchAPI('/events');
+        if (!res.events || res.events.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No events organized.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = res.events.map(ev => `
+          <tr>
+            <td class="fw-bold text-dark">${ev.title}</td>
+            <td><span class="badge bg-light text-primary border">${ev.department}</span></td>
+            <td class="small">
+              <div><i class="bi bi-calendar me-1"></i>${new Date(ev.event_date).toLocaleString()}</div>
+              <div class="text-muted"><i class="bi bi-geo-alt me-1"></i>${ev.venue}</div>
+            </td>
+            <td>
+              <div class="fw-bold text-primary">${ev.registered_count} / ${ev.seat_capacity} registered</div>
+              <div class="small text-muted">${ev.remaining_seats} seats left</div>
+            </td>
+            <td><span class="badge bg-success">${ev.status}</span></td>
+            <td class="text-end">
+              <a href="/gate-scanner.html" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-qr-code-scan me-1"></i> Scan Passes
+              </a>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Failed to load events.</td></tr>';
+      }
+    }
+
+    async function loadAdminSOS() {
+      const container = document.getElementById('adm-sos-container');
+      try {
+        const res = await fetchAPI('/sos/active');
+        if (!res.alerts || res.alerts.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-muted">No SOS alerts recorded. Campus is safe.</div>';
+          return;
+        }
+
+        container.innerHTML = res.alerts.map(a => `
+          <div class="p-3 border rounded-3 mb-2 ${a.status === 'ACTIVE' ? 'bg-danger-subtle border-danger' : 'bg-light'}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <span class="badge ${a.status === 'ACTIVE' ? 'bg-danger' : 'bg-secondary'} me-1">${a.status} SOS</span>
+                <strong class="text-dark">${a.student_name}</strong> (${a.roll_number || 'N/A'}, Dept: ${a.department || 'N/A'})
+              </div>
+              <div class="small text-muted">${new Date(a.created_at).toLocaleString()}</div>
+            </div>
+            <div class="small mb-2">
+              <strong>Campus Location:</strong> ${a.location_name || 'Grounds'} 
+              <span class="text-muted font-monospace">(Lat: ${a.latitude}, Lng: ${a.longitude})</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="https://maps.google.com/?q=${a.latitude},${a.longitude}" target="_blank" class="btn btn-outline-dark btn-sm py-0">
+                <i class="bi bi-map me-1"></i> Open Coordinates Map
+              </a>
+              ${a.status === 'ACTIVE' ? `
+                <button class="btn btn-danger btn-sm fw-semibold" onclick="resolveSOSAlert(${a.sos_id})">
+                  <i class="bi bi-check-circle me-1"></i> Mark Attended & Resolve
+                </button>
+              ` : `
+                <span class="small text-success fw-bold"><i class="bi bi-check2-all me-1"></i> Attended: ${a.resolution_remarks || 'Resolved'}</span>
+              `}
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<div class="text-danger small p-2">Failed to load SOS logs.</div>';
+      }
+    }
+
+    async function resolveSOSAlert(id) {
+      const remarks = prompt('Enter resolution remarks (e.g. Campus security verified student is safe):');
+      if (remarks === null) return;
+      try {
+        const res = await fetchAPI(`/sos/resolve/${id}`, {
+          method: 'POST',
+          body: { remarks }
+        });
+        showToast(res.message);
+        loadAdminSOS();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function loadAdminUsers() {
+      const tbody = document.getElementById('adm-users-tbody');
+      try {
+        const res = await fetchAPI('/admin/users');
+        if (!res.users || res.users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No users found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = res.users.map(u => `
+          <tr>
+            <td>
+              <div class="fw-bold text-dark">${u.full_name}</div>
+              <div class="small text-muted">${u.email} • ${u.phone || 'No phone'}</div>
+            </td>
+            <td class="font-monospace">${u.roll_number || 'N/A'}</td>
+            <td class="small">${u.department} (${u.year_of_study || 'N/A'})</td>
+            <td>
+              <span class="badge ${u.role_name === 'super_admin' ? 'bg-danger' : u.role_name === 'dept_admin' ? 'bg-warning text-dark' : 'bg-primary'} font-monospace">
+                ${u.role_name.toUpperCase()}
+              </span>
+            </td>
+            <td>
+              <span class="badge ${u.is_active ? 'bg-success' : 'bg-danger'}">${u.is_active ? 'ACTIVE' : 'SUSPENDED'}</span>
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Role</button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeUserRole(${u.user_id}, 3)">Set Student</a></li>
+                  <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeUserRole(${u.user_id}, 2)">Set Dept Admin</a></li>
+                  <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeUserRole(${u.user_id}, 1)">Set Super Admin</a></li>
+                </ul>
+                <button class="btn ${u.is_active ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm" onclick="toggleUserStatus(${u.user_id}, ${u.is_active ? 0 : 1})">
+                  ${u.is_active ? 'Deactivate' : 'Activate'}
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Failed to load users.</td></tr>';
+      }
+    }
+
+    async function changeUserRole(userId, roleId) {
+      try {
+        const res = await fetchAPI(`/admin/users/${userId}/role`, {
+          method: 'PUT',
+          body: { role_id: roleId }
+        });
+        showToast(res.message);
+        loadAdminUsers();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function toggleUserStatus(userId, isActive) {
+      try {
+        const res = await fetchAPI(`/admin/users/${userId}/status`, {
+          method: 'PUT',
+          body: { is_active: isActive }
+        });
+        showToast(res.message);
+        loadAdminUsers();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peer-to-Peer Marketplace — CampusCare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div id="navbar-mount"></div>
+
+  <main class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-shop text-primary me-2"></i> Peer-to-Peer Campus Marketplace</h2>
+        <p class="text-muted small mb-0">Buy, borrow, or giveaway semester textbooks, calculators, lab coats, and project components within campus</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#postItemModal">
+          <i class="bi bi-plus-lg me-1"></i> List an Item
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2" id="marketplace-tabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active fw-semibold" id="browse-tab" data-bs-toggle="pill" data-bs-target="#browse-pane" onclick="loadItems()">
+          <i class="bi bi-grid me-1"></i> Browse Catalog
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link fw-semibold" id="my-tab" data-bs-toggle="pill" data-bs-target="#my-pane" onclick="loadMyActivity()">
+          <i class="bi bi-person-lines-fill me-1"></i> My Listings & Requests
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Browse Catalog Pane -->
+      <div class="tab-pane fade show active" id="browse-pane">
+        <!-- Search & Filters Card -->
+        <div class="card card-custom p-3 mb-4">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="filter-search" class="form-control border-start-0" placeholder="Search by title or keyword..." onkeyup="filterDebounce()">
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="filter-category" class="form-select" onchange="loadItems()">
+                <option value="All">All Categories</option>
+                <option value="Books">Textbooks & Notes</option>
+                <option value="Electronics">Electronics & Calculators</option>
+                <option value="Stationery">Stationery & Drafters</option>
+                <option value="Lab Equipment">Lab Coats & Equipment</option>
+                <option value="Sports">Sports & Gymkhana</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="filter-type" class="form-select" onchange="loadItems()">
+                <option value="All">All Listing Types</option>
+                <option value="SALE">For Sale</option>
+                <option value="BORROW">Available to Borrow</option>
+                <option value="GIVEAWAY">Free Giveaway</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-grid">
+              <button class="btn btn-outline-secondary btn-sm" onclick="resetFilters()">Reset Filters</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Grid -->
+        <div class="row g-4" id="items-grid">
+          <div class="col-12 text-center py-5 text-muted">Loading marketplace catalog...</div>
+        </div>
+      </div>
+
+      <!-- My Activity Pane -->
+      <div class="tab-pane fade" id="my-pane">
+        <div class="row g-4">
+          <!-- My Items -->
+          <div class="col-lg-6">
+            <div class="card card-custom">
+              <div class="card-header-custom">
+                <div class="fw-bold"><i class="bi bi-tags text-primary me-2"></i> My Active Listings</div>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#postItemModal">+ New</button>
+              </div>
+              <div class="p-3" id="my-items-container">
+                <div class="text-center py-4 text-muted small">Loading your listings...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requests Received & Sent -->
+          <div class="col-lg-6">
+            <!-- Requests Received -->
+            <div class="card card-custom mb-4">
+              <div class="card-header-custom bg-light">
+                <div class="fw-bold"><i class="bi bi-inbox text-warning me-2"></i> Requests Received (Action Required)</div>
+              </div>
+              <div class="p-3" id="received-requests-container">
+                <div class="text-center py-4 text-muted small">Loading incoming requests...</div>
+              </div>
+            </div>
+
+            <!-- Requests Sent -->
+            <div class="card card-custom">
+              <div class="card-header-custom bg-light">
+                <div class="fw-bold"><i class="bi bi-send text-info me-2"></i> Requests Sent by Me</div>
+              </div>
+              <div class="p-3" id="sent-requests-container">
+                <div class="text-center py-4 text-muted small">Loading outgoing requests...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Post New Item -->
+  <div class="modal fade" id="postItemModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-primary me-2"></i> Post Item to Marketplace</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="post-item-form">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Item Title *</label>
+              <input type="text" id="item-title" class="form-control" placeholder="e.g. CASIO Scientific Calculator fx-991EX" required>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Category *</label>
+                <select id="item-category" class="form-select" required>
+                  <option value="Books">Textbooks & Notes</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Stationery">Stationery</option>
+                  <option value="Lab Equipment">Lab Equipment</option>
+                  <option value="Sports">Sports</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Listing Type *</label>
+                <select id="item-type" class="form-select" onchange="togglePriceField(this.value)" required>
+                  <option value="SALE">For Sale</option>
+                  <option value="BORROW">For Borrow / Loan</option>
+                  <option value="GIVEAWAY">Free Giveaway</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6" id="price-wrapper">
+                <label class="form-label small fw-semibold">Price (₹)</label>
+                <input type="number" id="item-price" class="form-control" placeholder="0.00" min="0" step="10">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Condition</label>
+                <select id="item-condition" class="form-select">
+                  <option value="Brand New">Brand New</option>
+                  <option value="Like New" selected>Like New</option>
+                  <option value="Good">Good</option>
+                  <option value="Fair">Fair</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Description & Campus Availability</label>
+              <textarea id="item-desc" class="form-control" rows="3" placeholder="Mention item details, semester, and preferred handover location on campus..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Upload Photo (Optional)</label>
+              <input type="file" id="item-image" class="form-control" accept="image/*">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" id="post-submit-btn" class="btn btn-primary fw-semibold">Publish Listing</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Request Item -->
+  <div class="modal fade" id="requestModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="bi bi-hand-index-thumb text-primary me-2"></i> Request Item</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="request-form">
+          <input type="hidden" id="req-item-id">
+          <div class="modal-body p-4">
+            <div class="p-3 bg-light rounded-3 mb-3">
+              <div class="small text-muted">Requesting from: <span id="req-owner-name" class="fw-bold text-dark"></span></div>
+              <div class="fw-bold fs-5 text-primary" id="req-item-title"></div>
+              <div class="small fw-semibold" id="req-item-price"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Purpose / Proposed Duration</label>
+              <input type="text" id="req-duration" class="form-control" placeholder="e.g. 2 weeks for exam practicals, or Immediate purchase">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Message to Owner</label>
+              <textarea id="req-msg" class="form-control" rows="2" placeholder="Hi, I am interested! Can we meet near CS Lab 2?"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Your Contact Phone</label>
+              <input type="tel" id="req-phone" class="form-control" placeholder="+91 98765 43210">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" id="send-req-btn" class="btn btn-primary fw-semibold">Send Request to Owner</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    renderNavbar('marketplace');
+
+    let currentUser = null;
+    let debounceTimer;
+
+    requireAuth().then(user => {
+      if (!user) return;
+      currentUser = user;
+      document.getElementById('req-phone').value = user.phone || '';
+
+      if (window.location.hash === '#my-requests') {
+        const myTab = document.getElementById('my-tab');
+        bootstrap.Tab.getOrCreateInstance(myTab).show();
+        loadMyActivity();
+      } else {
+        loadItems();
+      }
+    });
+
+    function filterDebounce() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(loadItems, 300);
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-search').value = '';
+      document.getElementById('filter-category').value = 'All';
+      document.getElementById('filter-type').value = 'All';
+      loadItems();
+    }
+
+    function togglePriceField(type) {
+      const priceWrapper = document.getElementById('price-wrapper');
+      if (type === 'GIVEAWAY' || type === 'BORROW') {
+        document.getElementById('item-price').value = '0';
+        priceWrapper.style.opacity = '0.5';
+      } else {
+        priceWrapper.style.opacity = '1';
+      }
+    }
+
+    async function loadItems() {
+      const grid = document.getElementById('items-grid');
+      const search = document.getElementById('filter-search').value;
+      const category = document.getElementById('filter-category').value;
+      const listing_type = document.getElementById('filter-type').value;
+
+      try {
+        const queryParams = new URLSearchParams({ search, category, listing_type });
+        const res = await fetchAPI('/marketplace/items?' + queryParams.toString());
+
+        if (!res.items || res.items.length === 0) {
+          grid.innerHTML = `
+            <div class="col-12 text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-1 text-secondary"></i>
+              <h5 class="mt-2 fw-semibold">No items match your filter</h5>
+              <p class="small text-muted">Be the first to list an item for your fellow students!</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = res.items.map(item => {
+          const isOwner = currentUser && currentUser.userId === item.owner_id;
+          const typeBadge = item.listing_type === 'SALE' 
+            ? '<span class="badge bg-success">SALE</span>' 
+            : item.listing_type === 'BORROW' 
+            ? '<span class="badge bg-info text-dark">BORROW</span>' 
+            : '<span class="badge bg-purple text-white" style="background-color:#9333ea;">GIVEAWAY</span>';
+
+          const statusBadge = item.status === 'RESERVED' 
+            ? '<span class="badge bg-warning text-dark ms-1">RESERVED</span>' 
+            : '';
+
+          return `
+            <div class="col-sm-6 col-lg-4">
+              <div class="card card-custom h-100 shadow-sm">
+                <div class="position-relative" style="height: 180px; overflow: hidden; background: #f1f5f9;">
+                  <img src="${item.image_url}" alt="${item.title}" class="w-100 h-100" style="object-fit: cover;">
+                  <div class="position-absolute top-0 start-0 m-2 d-flex gap-1">
+                    ${typeBadge}
+                    ${statusBadge}
+                  </div>
+                  <div class="position-absolute bottom-0 end-0 m-2">
+                    <span class="badge bg-dark bg-opacity-75">${item.item_condition}</span>
+                  </div>
+                </div>
+                <div class="card-body d-flex flex-column p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem;">${item.category}</span>
+                    <span class="fs-5 fw-bold text-primary">${formatCurrency(item.price)}</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-2">${item.title}</h6>
+                  <p class="text-muted small flex-grow-1" style="font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${item.description || 'No additional description provided.'}
+                  </p>
+                  
+                  <div class="pt-2 border-top mt-auto d-flex justify-content-between align-items-center">
+                    <div class="small text-muted">
+                      <i class="bi bi-person-circle me-1"></i>${item.owner_name}
+                      <div style="font-size: 0.72rem;">${item.owner_dept}</div>
+                    </div>
+                    ${isOwner ? `
+                      <span class="badge bg-secondary">Your Listing</span>
+                    ` : `
+                      <button class="btn btn-outline-primary btn-sm fw-semibold" onclick="openRequestModal(${item.item_id}, '${escapeHtml(item.title)}', '${formatCurrency(item.price)}', '${escapeHtml(item.owner_name)}')">
+                        <i class="bi bi-send me-1"></i> Request
+                      </button>
+                    `}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        grid.innerHTML = '<div class="col-12 text-center text-danger py-4">Failed to load marketplace catalog.</div>';
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function openRequestModal(id, title, price, owner) {
+      document.getElementById('req-item-id').value = id;
+      document.getElementById('req-item-title').innerText = title;
+      document.getElementById('req-item-price').innerText = price;
+      document.getElementById('req-owner-name').innerText = owner;
+      const modal = new bootstrap.Modal(document.getElementById('requestModal'));
+      modal.show();
+    }
+
+    // Submit Request
+    document.getElementById('request-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const itemId = document.getElementById('req-item-id').value;
+      const btn = document.getElementById('send-req-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Dispatching...';
+
+      try {
+        const payload = {
+          proposed_duration: document.getElementById('req-duration').value,
+          message: document.getElementById('req-msg').value,
+          contact_phone: document.getElementById('req-phone').value
+        };
+
+        const res = await fetchAPI(`/marketplace/items/${itemId}/request`, {
+          method: 'POST',
+          body: payload
+        });
+
+        bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
+        showToast(res.message);
+        loadItems();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Send Request to Owner';
+      }
+    });
+
+    // Create Item Listing
+    document.getElementById('post-item-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('post-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Listing Item...';
+
+      try {
+        const formData = new FormData();
+        formData.append('title', document.getElementById('item-title').value);
+        formData.append('category', document.getElementById('item-category').value);
+        formData.append('listing_type', document.getElementById('item-type').value);
+        formData.append('price', document.getElementById('item-price').value || 0);
+        formData.append('item_condition', document.getElementById('item-condition').value);
+        formData.append('description', document.getElementById('item-desc').value);
+
+        const fileInput = document.getElementById('item-image');
+        if (fileInput.files[0]) {
+          formData.append('image', fileInput.files[0]);
+        }
+
+        const res = await fetchAPI('/marketplace/items', {
+          method: 'POST',
+          body: formData
+        });
+
+        bootstrap.Modal.getInstance(document.getElementById('postItemModal')).hide();
+        showToast(res.message);
+        document.getElementById('post-item-form').reset();
+        loadItems();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Publish Listing';
+      }
+    });
+
+    // Load My Activity
+    async function loadMyActivity() {
+      const itemsContainer = document.getElementById('my-items-container');
+      const recContainer = document.getElementById('received-requests-container');
+      const sentContainer = document.getElementById('sent-requests-container');
+
+      try {
+        const data = await fetchAPI('/marketplace/my-activity');
+
+        // Render My Listings
+        if (!data.myItems || data.myItems.length === 0) {
+          itemsContainer.innerHTML = '<div class="text-center py-4 text-muted small">You haven\'t listed any items yet.</div>';
+        } else {
+          itemsContainer.innerHTML = data.myItems.map(item => `
+            <div class="p-3 border rounded-3 mb-2 bg-white d-flex align-items-center gap-3">
+              <img src="${item.image_url}" class="rounded" width="50" height="50" style="object-fit: cover;">
+              <div class="flex-grow-1">
+                <div class="fw-bold text-dark">${item.title}</div>
+                <div class="small text-muted">${item.listing_type} • ${formatCurrency(item.price)} • Status: <span class="badge ${item.status === 'AVAILABLE' ? 'bg-success' : 'bg-warning text-dark'}">${item.status}</span></div>
+              </div>
+              <div>
+                ${item.status === 'AVAILABLE' ? `
+                  <button class="btn btn-outline-secondary btn-sm" onclick="markItemStatus(${item.item_id}, 'COMPLETED')">Mark Sold</button>
+                ` : `
+                  <button class="btn btn-outline-success btn-sm" onclick="markItemStatus(${item.item_id}, 'AVAILABLE')">Relist</button>
+                `}
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // Render Received Requests
+        if (!data.receivedRequests || data.receivedRequests.length === 0) {
+          recContainer.innerHTML = '<div class="text-center py-4 text-muted small">No incoming requests on your items.</div>';
+        } else {
+          recContainer.innerHTML = data.receivedRequests.map(r => `
+            <div class="p-3 border rounded-3 mb-2 ${r.status === 'PENDING' ? 'bg-warning-subtle border-warning' : 'bg-light'}">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <div class="fw-bold text-dark">${r.item_title}</div>
+                <span class="badge ${r.status === 'PENDING' ? 'bg-warning text-dark' : r.status === 'ACCEPTED' ? 'bg-success' : 'bg-danger'}">${r.status}</span>
+              </div>
+              <div class="small text-muted mb-2">
+                From: <strong>${r.requester_name}</strong> (${r.requester_dept}) • <i class="bi bi-telephone me-1"></i>${r.requester_phone || r.contact_phone || 'N/A'}
+              </div>
+              <div class="small p-2 bg-white rounded border mb-2">"${r.message || 'Interested in item.'}" (${r.proposed_duration || 'Duration not specified'})</div>
+              ${r.status === 'PENDING' ? `
+                <div class="d-flex gap-2">
+                  <button class="btn btn-success btn-sm fw-semibold" onclick="respondRequest(${r.request_id}, 'ACCEPT')">
+                    <i class="bi bi-check-lg me-1"></i> Accept Request
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" onclick="respondRequest(${r.request_id}, 'REJECT')">
+                    Decline
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          `).join('');
+        }
+
+        // Render Sent Requests
+        if (!data.sentRequests || data.sentRequests.length === 0) {
+          sentContainer.innerHTML = '<div class="text-center py-4 text-muted small">You haven\'t sent any requests yet.</div>';
+        } else {
+          sentContainer.innerHTML = data.sentRequests.map(r => `
+            <div class="p-3 border rounded-3 mb-2 bg-light">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <div class="fw-bold text-dark">${r.item_title}</div>
+                <span class="badge ${r.status === 'PENDING' ? 'bg-warning text-dark' : r.status === 'ACCEPTED' ? 'bg-success' : 'bg-danger'}">${r.status}</span>
+              </div>
+              <div class="small text-muted">Owner: ${r.owner_name} • Contact: ${r.owner_phone || r.owner_email}</div>
+              ${r.status === 'ACCEPTED' ? `
+                <div class="alert alert-success p-2 small mt-2 mb-0">
+                  <i class="bi bi-check-circle-fill me-1"></i> Accepted! Contact the owner to arrange handover.
+                </div>
+              ` : ''}
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        showToast('Failed to load activity', 'error');
+      }
+    }
+
+    async function respondRequest(requestId, action) {
+      try {
+        const res = await fetchAPI(`/marketplace/requests/${requestId}/respond`, {
+          method: 'POST',
+          body: { action }
+        });
+        showToast(res.message);
+        loadMyActivity();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function markItemStatus(itemId, status) {
+      try {
+        const res = await fetchAPI(`/marketplace/items/${itemId}/status`, {
+          method: 'PUT',
+          body: { status }
+        });
+        showToast(res.message);
+        loadMyActivity();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
